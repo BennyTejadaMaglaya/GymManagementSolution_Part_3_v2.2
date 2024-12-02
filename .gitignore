@@ -1,0 +1,57 @@
+# Ignore build output directories
+bin/
+obj/
+
+# Ignore Visual Studio settings folder
+.vs/
+
+# Ignore user-specific files
+*.user
+*.userosscache
+*.suo
+*.userprefs
+
+# Ignore Entity Framework migrations folder
+GymMigrations/
+
+# Ignore database files (SQLite)
+*.db
+*.db-shm
+*.db-wal
+
+# Ignore JetBrains Rider configuration files
+.idea/
+
+# Ignore temporary files created by Visual Studio
+# Windows Installer generated files
+Thumbs.db
+Desktop.ini
+
+# Ignore logs
+*.log
+
+# Ignore compiled dynamic libraries (e.g., .so, .dylib, .a, .dll)
+*.dll
+*.pdb
+*.a
+*.so
+*.dylib
+
+# Ignore npm or node_modules if you're using Node.js for front-end
+node_modules/
+
+# Ignore Visual Studio for Mac settings (if applicable)
+.vscode/
+
+# Ignore package restore directories
+packages/
+
+# Ignore coverage files
+coverage/
+
+# Ignore IDE-specific configuration files (like for Visual Studio Code or JetBrains Rider)
+.vscode/
+.idea/
+
+# Ignore backup files
+*~
