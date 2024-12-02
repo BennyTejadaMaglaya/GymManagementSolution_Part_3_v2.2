@@ -1,0 +1,74 @@
+﻿@model GymManagement.Models.GroupClass
+
+<partial name="_ViewHeading" />
+
+<hr />
+<form asp-action="Create">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="FitnessCategoryID" class="control-label"></label>
+                <select asp-for="FitnessCategoryID" class="form-control" asp-items="ViewBag.FitnessCategoryID">
+                    <option value="">Select a Fitness Category</option>
+                </select>
+                <span asp-validation-for="FitnessCategoryID" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="InstructorID" class="control-label"></label>
+                <select asp-for="InstructorID" class="form-control" asp-items="ViewBag.InstructorID">
+                    <option value="">Select an Instructor</option>
+                </select>
+                <span asp-validation-for="FitnessCategoryID" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DOW" class="control-label"></label>
+                <select asp-for="DOW" class="form-control" asp-items="Html.GetEnumSelectList<DOW>()"></select>
+                <span asp-validation-for="DOW" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ClassTimeID" class="control-label"></label>
+                <select asp-for="ClassTimeID" class="form-control" asp-items="ViewBag.ClassTimeID">
+                    <option value="">Select Class Start Time</option>
+                </select>
+                <span asp-validation-for="FitnessCategoryID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="row">
+                <div class="form-group">
+                    <label asp-for="Description" class="control-label"></label>
+                    <textarea asp-for="Description" rows="2" class="form-control"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+                <div class="form-group col-md-6">
+                    <label class="control-label"> Clients Enrolled</label> <button type="button" id="btnRight" class="btn btn-danger btn-sm">
+                        <strong>-</strong>
+                    </button>
+                    @Html.ListBox("selectedOptions", (MultiSelectList)ViewBag.selOpts, new { @size = 10, @class = "form-control" })
+                </div>
+
+                <div class="form-group col-md-6">
+                    <label class="control-label"> Choose Clients</label> <button type="button" id="btnLeft" class="btn btn-success btn-sm">
+                        <strong>+</strong>
+                    </button>
+                    @Html.ListBox("availOptions", (MultiSelectList)ViewBag.availOpts, new { @size = 10, @class = "form-control" })
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <input type="submit" id="btnSubmit" value="Create" class="btn btn-primary" />
+    </div>
+</form>
+
+<div>
+    <partial name="_BackToList" />
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="~/js/multiselect.js"></script>
+}
