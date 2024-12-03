@@ -2,7 +2,7 @@
 
 namespace GymManagement.Models
 {
-    public class FitnessCategory : Auditable
+    public class FitnessCategory : Auditable, IValidatableObject
     {
         public int ID { get; set; }
 
@@ -20,5 +20,16 @@ namespace GymManagement.Models
         [Display(Name = "Exercises")]
         public ICollection<ExerciseCategory> ExerciseCategories { get; set; } = new HashSet<ExerciseCategory>();
 
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (Category.Contains("Macbeth"))//I know this is silly, but it is just for fun
+            {
+                yield return new ValidationResult("You should never enter the name of The Scotish Play!", new[] { "Category" });
+            }
+            if (Category.Length == 7)
+            {
+                yield return new ValidationResult("You cannot have a Category with length 7.", new[] { "Category" });
+            }
+        }
     }
 }

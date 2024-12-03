@@ -441,6 +441,12 @@ namespace GymManagement.Controllers
             return new SelectList(qry, "ID", "FormalName", selectedId);
         }
 
+        [HttpGet]
+        public JsonResult GetFitnessCategories(int? id)
+        {
+            return Json(FitnessCategoryList(id));
+        }
+
         private SelectList FitnessCategoryList(int? selectedId)
         {
             return new SelectList(_context

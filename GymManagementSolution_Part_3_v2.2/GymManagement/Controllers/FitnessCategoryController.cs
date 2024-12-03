@@ -3,6 +3,7 @@ using GymManagement.Data;
 using GymManagement.Models;
 using GymManagement.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 
 namespace GymManagement.Controllers
@@ -82,7 +83,21 @@ namespace GymManagement.Controllers
                 }
                 ModelState.AddModelError(msg.ErrProperty, msg.ErrMessage);
             }
-
+            //Decide if we need to send the Validaiton Errors directly to the client
+            if (!ModelState.IsValid && Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                //Was an AJAX request so build a message with all validation errors
+                string errorMessage = "";
+                foreach (var modelState in ViewData.ModelState.Values)
+                {
+                    foreach (ModelError error in modelState.Errors)
+                    {
+                        errorMessage += error.ErrorMessage + "|";
+                    }
+                }
+                //Note: returning a BadRequest results in HTTP Status code 400
+                return BadRequest(errorMessage);
+            }
             return View(fitnessCategory);
         }
 
