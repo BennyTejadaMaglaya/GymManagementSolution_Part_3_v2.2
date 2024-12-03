@@ -1,6 +1,7 @@
 ﻿using GymManagement.CustomControllers;
 using GymManagement.Data;
 using GymManagement.Models;
+using GymManagement.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -71,9 +72,15 @@ namespace GymManagement.Controllers
                     return Redirect(returnUrl);
                 }
             }
-            catch (DbUpdateException)
+            catch (DbUpdateException dex)
             {
-                ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists see your system administrator.");
+                ExceptionMessageVM msg = new();
+                if (dex.GetBaseException().Message.Contains("UNIQUE constraint failed"))
+                {
+                    msg.ErrProperty = "Category";
+                    msg.ErrMessage = "Unable to save changes. Remember, you cannot have duplicate Categories.";
+                }
+                ModelState.AddModelError(msg.ErrProperty, msg.ErrMessage);
             }
 
             return View(fitnessCategory);
@@ -137,9 +144,15 @@ namespace GymManagement.Controllers
                         throw;
                     }
                 }
-                catch (DbUpdateException)
+                catch (DbUpdateException dex)
                 {
-                    ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists see your system administrator.");
+                    ExceptionMessageVM msg = new();
+                    if (dex.GetBaseException().Message.Contains("UNIQUE constraint failed"))
+                    {
+                        msg.ErrProperty = "Category";
+                        msg.ErrMessage = "Unable to save changes. Remember, you cannot have duplicate Categories.";
+                    }
+                    ModelState.AddModelError(msg.ErrProperty, msg.ErrMessage);
                 }
 
             }
@@ -188,15 +201,15 @@ namespace GymManagement.Controllers
             }
             catch (DbUpdateException dex)
             {
+                ExceptionMessageVM msg = new();
                 if (dex.GetBaseException().Message.Contains("FOREIGN KEY constraint failed"))
                 {
-                    ModelState.AddModelError("", "Unable to Delete Fitness Category. " +
-                        "Remember, you cannot delete a Category if there are Group Classes in it.");
+                    msg.ErrProperty = "";
+                    msg.ErrMessage = "Unable to Delete " + ViewData["ControllerFriendlyName"] +
+                        ". Remember, you cannot delete a " + ViewData["ControllerFriendlyName"] +
+                        " that has related records.";
                 }
-                else
-                {
-                    ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists see your system administrator.");
-                }
+                ModelState.AddModelError(msg.ErrProperty, msg.ErrMessage);
             }
             return View(fitnessCategory);
 
