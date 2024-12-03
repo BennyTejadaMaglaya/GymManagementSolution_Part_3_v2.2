@@ -139,6 +139,14 @@ namespace GymManagement.Data
             .HasIndex(p => new { p.InstructorID, p.DOW, p.ClassTimeID })
             .IsUnique();
 
+            modelBuilder.Entity<FitnessCategory>()
+            .HasIndex(f => f.Category)
+            .IsUnique();
+
+            modelBuilder.Entity<Exercise>()
+            .HasIndex(e => e.Name)
+            .IsUnique();
+
             //Many to Many Intersection
             modelBuilder.Entity<Enrollment>()
             .HasKey(e => new { e.ClientID, e.GroupClassID });
