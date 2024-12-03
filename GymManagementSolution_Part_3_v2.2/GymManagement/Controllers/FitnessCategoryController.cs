@@ -1,9 +1,11 @@
-﻿using GymManagement.CustomControllers;
+﻿using System.Numerics;
+using GymManagement.CustomControllers;
 using GymManagement.Data;
 using GymManagement.Models;
 using GymManagement.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace GymManagement.Controllers
@@ -228,6 +230,15 @@ namespace GymManagement.Controllers
             }
             return View(fitnessCategory);
 
+        }
+
+        public PartialViewResult ListOfExercisesDetails(int id)
+        {
+            var query = from s in _context.ExerciseCategories.Include(p => p.Exercise)
+                        where s.FitnessCategoryID == id
+                        orderby s.Exercise.Name
+                        select s;
+            return PartialView("_ListOfExercises", query.ToList());
         }
 
         private bool FitnessCategoryExists(int id)
