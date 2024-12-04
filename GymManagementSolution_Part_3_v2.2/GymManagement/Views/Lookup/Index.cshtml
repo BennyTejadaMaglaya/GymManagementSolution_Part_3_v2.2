@@ -1,0 +1,58 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h2>Lookup Values</h2>
+
+<div>
+    <!-- Nav tabs -->
+    <nav>
+        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+            <button class="nav-link active" id="Exercise-Tab" data-bs-toggle="tab" data-bs-target="#ExercisePanel" type="button" role="tab" aria-controls="ExercisePanel" aria-selected="true">Exercises</button>
+            <button class="nav-link" id="ExerciseCategory-Tab" data-bs-toggle="tab" data-bs-target="#ExerciseCategoryPanel" type="button" role="tab" aria-controls="ExerciseCategoryPanel" aria-selected="false">Exercise Categories</button>
+        </div>
+    </nav>
+    <div class="tab-content" id="nav-tabContent">
+        <div class="tab-pane fade show active" id="ExercisePanel" role="tabpanel" aria-labelledby="Exercise-Tab"><br /></div>
+        <div class="tab-pane fade" id="ExerciseCategoryPanel" role="tabpanel" aria-labelledby="ExerciseCategory-Tab"><br /></div>
+    </div>
+</div>
+<hr />
+<br />
+@section Scripts {
+    <script type="text/javascript">
+        function refreshTab(activeTab) {
+            switch (activeTab) {
+                case 'Exercise-Tab': $('#ExercisePanel').load('/Lookup/Exercise');
+                    break;
+                case 'ExerciseCategory-Tab': $('#ExerciseCategoryPanel').load('/Lookup/ExerciseCategory');
+                    break;
+                default: break;
+            };
+            return;
+        };
+        $('.nav-link').click(function () {
+            var activeTab = $(this).attr("id");
+            refreshTab(activeTab);
+        });
+        $(".tab-content").on("click", ".linkClick", function (event) {
+            event.preventDefault();
+            var address = $(this).attr("href");
+            var lookup = address.split("/")[1];
+            var id = $("#" + lookup + "ID").val();
+            var caption = $("#" + lookup).html();
+            if (id == null) {
+                alert("Error: no value selected from the " + caption + " list!");
+            } else {
+                window.location.href = address + "/" + id;
+            }
+        });
+        $(function () {
+            setTimeout(function () {
+                $("#@ViewData["Tab"]").trigger('click');
+            }, 10);
+        });
+    </script>
+}
+
