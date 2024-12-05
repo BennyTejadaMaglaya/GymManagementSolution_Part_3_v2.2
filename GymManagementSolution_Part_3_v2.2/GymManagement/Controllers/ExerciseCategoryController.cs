@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using GymManagement.Data;
 using GymManagement.Models;
 using GymManagement.CustomControllers;
+using OfficeOpenXml;
 
 namespace GymManagement.Controllers
 {
@@ -160,6 +161,144 @@ namespace GymManagement.Controllers
             }
 
             await _context.SaveChangesAsync();
+            return Redirect(ViewData["returnURL"].ToString());
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> InsertFromExcel(IFormFile theExcel)
+        {
+            string feedBack = string.Empty;
+            if (theExcel != null)
+            {
+                string mimeType = theExcel.ContentType;
+                long fileLength = theExcel.Length;
+                if (!(mimeType == "" || fileLength == 0))//Looks like we have a file!!!
+                {
+                    if (mimeType.Contains("excel") || mimeType.Contains("spreadsheet"))
+                    {
+                        ExcelPackage excel;
+                        using (var memoryStream = new MemoryStream())
+                        {
+                            await theExcel.CopyToAsync(memoryStream);
+                            excel = new ExcelPackage(memoryStream);
+                        }
+                        var workSheet = excel.Workbook.Worksheets[0];
+                        var start = workSheet.Dimension.Start;
+                        var end = workSheet.Dimension.End;
+                        int successCount = 0;
+                        int errorCount = 0;
+                        if (workSheet.Cells[1, 1].Text == "Exercise" && workSheet.Cells[1, 2].Text == "FitnessCategory")
+                        {
+                            for (int row = start.Row + 1; row <= end.Row; row++)
+                            {
+                                ExerciseCategory exerciseCategory = new ExerciseCategory();
+                                Exercise exercise = new Exercise();
+                                FitnessCategory fitnessCategory = new FitnessCategory();
+                                try
+                                {
+                                    string exerciseName = workSheet.Cells[row, 1].Text.Trim();
+
+                                    string fitnessCategoryName = workSheet.Cells[row, 2].Text.Trim();
+
+                                    exercise = await _context.Exercises
+                                        .FirstOrDefaultAsync(e => e.Name == exerciseName);
+
+                                    if (exercise == null)
+                                    {
+                                        exercise = new Exercise { Name = exerciseName };
+                                        _context.Exercises.Add(exercise);
+                                        await _context.SaveChangesAsync();
+                                    }
+
+                                    fitnessCategory = await _context.FitnessCategories
+                                        .FirstOrDefaultAsync(fc => fc.Category == fitnessCategoryName);
+
+                                    if (fitnessCategory == null)
+                                    {
+                                        fitnessCategory = new FitnessCategory { Category = fitnessCategoryName };
+                                        _context.FitnessCategories.Add(fitnessCategory);
+                                        await _context.SaveChangesAsync();
+                                    }
+
+                                    var existingCombination = await _context.ExerciseCategories
+                                        .FirstOrDefaultAsync(ec => ec.ExerciseID == exercise.ID && ec.FitnessCategoryID == fitnessCategory.ID);
+
+                                    if (existingCombination == null)
+                                    {
+                                        exerciseCategory.Exercise = exercise;
+                                        exerciseCategory.FitnessCategory = fitnessCategory;
+                                        _context.ExerciseCategories.Add(exerciseCategory);
+                                        await _context.SaveChangesAsync();
+                                        successCount++;
+                                    }
+                                    else
+                                    {
+                                        feedBack += "Warning: The Exercise \"" + exercise.Name + "\" is already associated with the category \"" + fitnessCategory.Category + "\".<br />";
+                                        errorCount++;
+                                    }
+                                }
+                                catch (DbUpdateException dex)
+                                {
+                                    errorCount++;
+                                    if (dex.GetBaseException().Message.Contains("UNIQUE constraint failed"))
+                                    {
+                                        feedBack += "Error: Record " + exercise.Name +
+                                            " was rejected as a duplicate." + "<br />";
+                                    }
+                                    else
+                                    {
+                                        feedBack += "Error: Record " + exercise.Name +
+                                            " caused a database error." + "<br />";
+                                    }
+                                    //Here is the trick to using SaveChanges in a loop.  You must remove the 
+                                    //offending object from the cue or it will keep raising the same error.
+                                    _context.Remove(exerciseCategory);
+                                }
+                                catch (Exception ex)
+                                {
+                                    errorCount++;
+                                    if (ex.GetBaseException().Message.Contains("correct format"))
+                                    {
+                                        feedBack += "Error: Record " + exercise.Name
+                                            + " was rejected becuase it was not in the correct format." + "<br />";
+                                    }
+                                    else
+                                    {
+                                        feedBack += "Error: Record " + exercise.Name
+                                            + " caused and error." + "<br />";
+                                    }
+                                }
+                            }
+                            feedBack += "Finished Importing " + (successCount + errorCount).ToString() +
+                                " Records with " + successCount.ToString() + " inserted and " +
+                                errorCount.ToString() + " rejected";
+                        }
+                        else
+                        {
+                            feedBack = "Error: You may have selected the wrong file to upload.<br /> " +
+                                "Remember, you must have the heading 'Exercise' in the " +
+                                "first cell of the first row and 'FitnessCategory' in the first cell of the second column.";
+                        }
+                    }
+                    else
+                    {
+                        feedBack = "Error: That file is not an Excel spreadsheet.";
+                    }
+                }
+                else
+                {
+                    feedBack = "Error:  file appears to be empty";
+                }
+            }
+            else
+            {
+                feedBack = "Error: No file uploaded";
+            }
+
+            TempData["Feedback"] = feedBack + "<br /><br />";
+
+            //Note that we are assuming that you are using the Preferred Approach to Lookup Values
+            //And the custom LookupsController
             return Redirect(ViewData["returnURL"].ToString());
         }
 
