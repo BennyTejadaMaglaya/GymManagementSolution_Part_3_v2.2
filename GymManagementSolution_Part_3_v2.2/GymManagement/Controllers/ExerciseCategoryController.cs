@@ -65,11 +65,19 @@ namespace GymManagement.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("FitnessCategoryID,ExerciseID")] ExerciseCategory exerciseCategory)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(exerciseCategory);
-                await _context.SaveChangesAsync();
-                return Redirect(ViewData["returnURL"].ToString());
+                if (ModelState.IsValid)
+                {
+                    _context.Add(exerciseCategory);
+                    await _context.SaveChangesAsync();
+                    return Redirect(ViewData["returnURL"].ToString());
+                }
+            }
+            catch (DbUpdateException)
+            {
+                ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem " +
+                    "persists see your system administrator.");
             }
             ViewData["ExerciseID"] = new SelectList(_context.Exercises, "ID", "Name", exerciseCategory.ExerciseID);
             ViewData["FitnessCategoryID"] = new SelectList(_context.FitnessCategories, "ID", "Category", exerciseCategory.FitnessCategoryID);
@@ -157,13 +165,24 @@ namespace GymManagement.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var exerciseCategory = await _context.ExerciseCategories.FindAsync(id);
-            if (exerciseCategory != null)
+            
+            try
             {
-                _context.ExerciseCategories.Remove(exerciseCategory);
+                if (exerciseCategory != null)
+                {
+                    _context.ExerciseCategories.Remove(exerciseCategory);
+                }
+
+                await _context.SaveChangesAsync();
+                return Redirect(ViewData["returnURL"].ToString());
+            }
+            catch (Exception)
+            {
+                ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem " +
+                    "persists see your system administrator.");
             }
 
-            await _context.SaveChangesAsync();
-            return Redirect(ViewData["returnURL"].ToString());
+            return View(exerciseCategory);
         }
 
         [HttpPost]

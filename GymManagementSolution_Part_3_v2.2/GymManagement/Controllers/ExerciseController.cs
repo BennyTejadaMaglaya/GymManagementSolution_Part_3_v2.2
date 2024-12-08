@@ -59,12 +59,21 @@ namespace GymManagement.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ID,Name")] Exercise exercise)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(exercise);
-                await _context.SaveChangesAsync();
-                return Redirect(ViewData["returnURL"].ToString());
+                if (ModelState.IsValid)
+                {
+                    _context.Add(exercise);
+                    await _context.SaveChangesAsync();
+                    return Redirect(ViewData["returnURL"].ToString());
+                }
             }
+            catch (DbUpdateException)
+            {
+                ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem " +
+                    "persists see your system administrator.");
+            }
+
             return View(exercise);
         }
 
@@ -143,13 +152,24 @@ namespace GymManagement.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var exercise = await _context.Exercises.FindAsync(id);
-            if (exercise != null)
+            
+            try
             {
-                _context.Exercises.Remove(exercise);
+                if (exercise != null)
+                {
+                    _context.Exercises.Remove(exercise);
+                }
+
+                await _context.SaveChangesAsync();
+                return Redirect(ViewData["returnURL"].ToString());
+            }
+            catch (Exception)
+            {
+                ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem " +
+                    "persists see your system administrator.");
             }
 
-            await _context.SaveChangesAsync();
-            return Redirect(ViewData["returnURL"].ToString());
+            return View(exercise);
         }
 
         private bool ExerciseExists(int id)
