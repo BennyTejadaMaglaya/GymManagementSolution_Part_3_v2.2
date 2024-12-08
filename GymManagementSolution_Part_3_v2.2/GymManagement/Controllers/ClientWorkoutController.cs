@@ -15,9 +15,11 @@ using GymManagement.CustomControllers;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
 using Microsoft.EntityFrameworkCore.Storage;
 using NuGet.Packaging;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GymManagement.Controllers
 {
+    [Authorize]
     public class ClientWorkoutController : ElephantController
     {
         private readonly GymContext _context;

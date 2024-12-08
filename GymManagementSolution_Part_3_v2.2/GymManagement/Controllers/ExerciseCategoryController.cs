@@ -9,9 +9,11 @@ using GymManagement.Data;
 using GymManagement.Models;
 using GymManagement.CustomControllers;
 using OfficeOpenXml;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GymManagement.Controllers
 {
+    [Authorize]
     public class ExerciseCategoryController : LookupsController
     {
         private readonly GymContext _context;

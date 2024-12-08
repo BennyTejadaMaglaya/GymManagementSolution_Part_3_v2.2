@@ -8,9 +8,11 @@ using Microsoft.EntityFrameworkCore;
 using GymManagement.Data;
 using GymManagement.Models;
 using GymManagement.CustomControllers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GymManagement.Controllers
 {
+    [Authorize]
     public class ExerciseController : LookupsController
     {
         private readonly GymContext _context;

@@ -3,9 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using GymManagement.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GymManagement.Controllers
 {
+    [Authorize]
     public class LookupController : CognizantController
     {
         private readonly GymContext _context;
