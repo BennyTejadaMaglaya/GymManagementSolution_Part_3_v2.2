@@ -15,9 +15,11 @@ using GymManagement.ViewModels;
 using System.Drawing;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GymManagement.Controllers
 {
+    [Authorize(Roles = "Admin,Supervisor,Staff")]
     public class ClientController : ElephantController
     {
         private readonly GymContext _context;
@@ -43,6 +45,7 @@ namespace GymManagement.Controllers
         }
 
         // GET: Clients/Details/5
+        [Authorize(Roles = "Admin,Supervisor,Staff")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -64,6 +67,7 @@ namespace GymManagement.Controllers
         }
 
         // GET: Clients/Create
+        [Authorize(Roles = "Admin,Supervisor,Staff")]
         public IActionResult Create()
         {
             PopulateDropDownLists();
@@ -75,6 +79,7 @@ namespace GymManagement.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Supervisor,Staff")]
         public async Task<IActionResult> Create([Bind("ID,MembershipNumber,FirstName,MiddleName,LastName,Phone," +
             "Email,DOB,PostalCode,HealthCondition,Notes,MembershipStartDate,MembershipEndDate," +
             "MembershipFee,FeePaid,MembershipTypeID")] Client client, IFormFile? thePicture)
@@ -114,6 +119,7 @@ namespace GymManagement.Controllers
         }
 
         // GET: Clients/Edit/5
+        [Authorize(Roles = "Admin,Supervisor,Staff")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -138,6 +144,7 @@ namespace GymManagement.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Supervisor,Staff")]
         public async Task<IActionResult> Edit(int id, Byte[] RowVersion, string? chkRemoveImage, IFormFile? thePicture)
         {
             //Get the Client to update
@@ -291,6 +298,7 @@ namespace GymManagement.Controllers
         }
 
         // GET: Clients/Delete/5
+        [Authorize(Roles = "Admin,Supervisor")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -308,12 +316,22 @@ namespace GymManagement.Controllers
                 return NotFound();
             }
 
+            if (!User.IsInRole("Admin"))//Since only Admin and Supervisor can get here, must be Supervisor
+            {
+                if (User.Identity?.Name != client.CreatedBy)//Did not create the record
+                {
+                    ModelState.AddModelError("", "You do not have authorization to delete this " +
+                        "record since you did not create it.");
+                    ViewData["disableButton"] = "disabled";
+                }
+            }
             return View(client);
         }
 
         // POST: Clients/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Supervisor")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var client = await _context.Clients
@@ -322,6 +340,16 @@ namespace GymManagement.Controllers
                 .FirstOrDefaultAsync(m => m.ID == id);
             try
             {
+                if (!User.IsInRole("Admin"))//Since only Admin and Supervisor can get here, must be Supervisor
+                {
+                    if (User.Identity?.Name != client?.CreatedBy)//Did not create the record
+                    {
+                        ModelState.AddModelError("", "You do not have authorization to delete this " +
+                            "record since you did not create it.");
+                        ViewData["disableButton"] = "disabled";
+                        return RedirectToAction("Delete", new { id = id });
+                    }
+                }
                 if (client != null)
                 {
                     _context.Clients.Remove(client);
@@ -351,6 +379,7 @@ namespace GymManagement.Controllers
             return View(client);
         }
 
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> MembershipTypeSummary(int? page, int? pageSizeID)
         {
             var sumQ = _context.Clients.Include(c=>c.MembershipType)
@@ -373,6 +402,7 @@ namespace GymManagement.Controllers
             return View(pagedData);
         }
 
+        [Authorize(Roles = "Admin")]
         public IActionResult MembershipTypeReport()
         {
             var membershipTypes = _context.Clients.Include(c => c.MembershipType)

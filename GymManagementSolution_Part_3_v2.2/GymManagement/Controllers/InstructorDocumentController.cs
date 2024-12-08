@@ -11,9 +11,11 @@ using GymManagement.CustomControllers;
 using GymManagement.Utilities;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GymManagement.Controllers
 {
+    [Authorize(Roles = "Admin,Supervisor,Staff")]
     public class InstructorDocumentController : ElephantController
     {
         private readonly GymContext _context;
@@ -76,6 +78,7 @@ namespace GymManagement.Controllers
             return View(pagedData);
         }
 
+        [Authorize(Roles = "Admin,Supervisor")]
         public async Task<IActionResult> Download(int id)
         {
             var theFile = await _context.UploadedFiles
@@ -91,9 +94,10 @@ namespace GymManagement.Controllers
             return File(theFile.FileContent.Content, theFile.MimeType, theFile.FileName);
         }
 
-        
+
 
         // GET: InstructorDocument/Edit/5
+        [Authorize(Roles = "Admin,Supervisor")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -117,6 +121,7 @@ namespace GymManagement.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Supervisor")]
         public async Task<IActionResult> Edit(int id)
         {
             var instructorDocumentToUpdate = await _context.InstructorDocuments
@@ -163,6 +168,7 @@ namespace GymManagement.Controllers
         }
 
         // GET: InstructorDocument/Delete/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -185,6 +191,7 @@ namespace GymManagement.Controllers
         // POST: InstructorDocument/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             if (_context.InstructorDocuments == null)

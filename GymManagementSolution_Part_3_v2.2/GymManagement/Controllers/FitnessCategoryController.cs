@@ -3,6 +3,7 @@ using GymManagement.CustomControllers;
 using GymManagement.Data;
 using GymManagement.Models;
 using GymManagement.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -10,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GymManagement.Controllers
 {
+    [Authorize]
     public class FitnessCategoryController : CognizantController
     {
         private readonly GymContext _context;
@@ -30,6 +32,7 @@ namespace GymManagement.Controllers
         }
 
         // GET: FitnessCategory/Details/5
+        [Authorize(Roles = "Admin,Supervisor,Staff")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -49,6 +52,7 @@ namespace GymManagement.Controllers
         }
 
         // GET: FitnessCategory/Create
+        [Authorize(Roles = "Admin,Supervisor,Staff")]
         public IActionResult Create()
         {
             return View();
@@ -59,6 +63,7 @@ namespace GymManagement.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Supervisor,Staff")]
         public async Task<IActionResult> Create([Bind("Category")] FitnessCategory fitnessCategory)
         {
             try
@@ -104,6 +109,7 @@ namespace GymManagement.Controllers
         }
 
         // GET: FitnessCategory/Edit/5
+        [Authorize(Roles = "Admin,Supervisor,Staff")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -124,6 +130,7 @@ namespace GymManagement.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Supervisor,Staff")]
         public async Task<IActionResult> Edit(int id)
         {
             //Go get the Doctor to update
@@ -177,6 +184,7 @@ namespace GymManagement.Controllers
         }
 
         // GET: FitnessCategory/Delete/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -198,6 +206,7 @@ namespace GymManagement.Controllers
         // POST: FitnessCategory/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var fitnessCategory = await _context.FitnessCategories.FindAsync(id);
@@ -232,6 +241,7 @@ namespace GymManagement.Controllers
 
         }
 
+        [Authorize(Roles = "Admin,Supervisor,Staff")]
         public PartialViewResult ListOfExercisesDetails(int id)
         {
             var query = from s in _context.ExerciseCategories.Include(p => p.Exercise)

@@ -2,12 +2,14 @@
 using GymManagement.Data;
 using GymManagement.Models;
 using GymManagement.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Numerics;
 
 namespace GymManagement.Controllers
 {
+    [Authorize(Roles = "Admin,Supervisor,Staff")]
     public class InstructorController : ElephantController
     {
         private readonly GymContext _context;
@@ -160,6 +162,7 @@ namespace GymManagement.Controllers
         }
 
         // GET: Instructor/Details/5
+        [Authorize(Roles = "Admin,Supervisor")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -182,6 +185,7 @@ namespace GymManagement.Controllers
         }
 
         // GET: Instructor/Create
+        [Authorize(Roles = "Admin,Supervisor")]
         public IActionResult Create()
         {
             return View();
@@ -192,6 +196,7 @@ namespace GymManagement.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Supervisor")]
         public async Task<IActionResult> Create([Bind("FirstName,MiddleName,LastName,HireDate,Phone," +
             "Email,IsActive")] Instructor instructor, List<IFormFile> theFiles)
         {
@@ -228,6 +233,7 @@ namespace GymManagement.Controllers
         }
 
         // GET: Instructor/Edit/5
+        [Authorize(Roles = "Admin,Supervisor")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -250,6 +256,7 @@ namespace GymManagement.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Supervisor")]
         public async Task<IActionResult> Edit(int id, List<IFormFile> theFiles)
         {
             //Go get the record to update
@@ -308,6 +315,7 @@ namespace GymManagement.Controllers
         }
 
         // GET: Instructor/Delete/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -330,6 +338,7 @@ namespace GymManagement.Controllers
         // POST: Instructor/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var instructor = await _context.Instructors
@@ -365,6 +374,7 @@ namespace GymManagement.Controllers
 
         }
 
+        [Authorize(Roles = "Admin,Supervisor")]
         public async Task<FileContentResult> Download(int id)
         {
             var theFile = await _context.UploadedFiles

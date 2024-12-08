@@ -69,9 +69,6 @@
                 <th class="d-none d-md-table-cell">
                     <input type="submit" value="Description" class="btn btn-toolbar" />
                 </th>
-                <th class="d-none d-lg-table-cell">
-                    <input type="submit" value="Enrollments" class="btn btn-toolbar" />
-                </th>
                 <th></th>
             </tr>
         </thead>
@@ -87,35 +84,6 @@
                     </td>
                     <td class="d-none d-md-table-cell">
                         @Html.DisplayFor(modelItem => item.ShortDescription)
-                    </td>
-                    <td class="d-none d-lg-table-cell">
-                        @{
-                            int clientCount = item.Enrollments.Count;
-                            if (clientCount > 0)
-                            {
-                                string firstClient = item.Enrollments.FirstOrDefault().Client.FormalName;
-                                if (clientCount > 1)
-                                {
-                                    string clientList = "";//Html string of Client names separated by <br /> tags
-                                    var c = item.Enrollments.ToList();
-                                    for (int i = 1; i < clientCount; i++)//Skip the first because we have it already
-                                    {
-                                        clientList += c[i].Client.FormalName + " <br />";
-                                    }
-                                    <a class="" role="button" data-bs-toggle="collapse" href="#collapseClients@(item.ID)"
-                                       aria-expanded="false" aria-controls="collapseClients@(item.ID)">
-                                        @firstClient <span class="badge bg-info">@clientCount</span>
-                                    </a>
-                                    <div class="collapse" id="collapseClients@(item.ID)">
-                                        @Html.Raw(clientList)
-                                    </div>
-                                }
-                                else
-                                {
-                                    @firstClient
-                                }
-                            }
-                        }
                     </td>
                     <td>
                         <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
