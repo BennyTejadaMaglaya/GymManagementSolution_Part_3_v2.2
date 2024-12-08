@@ -1,4 +1,5 @@
 using GymManagement.Data;
+using GymManagement.Utilities;
 using GymManagement.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -61,6 +62,9 @@ builder.Services.AddSingleton<IEmailConfiguration>(builder.Configuration
 
 //For the Identity System
 builder.Services.AddTransient<IEmailSender, EmailSender>();
+
+//Email with methods for production use.
+builder.Services.AddTransient<IMyEmailSender, MyEmailSender>();
 
 builder.Services.AddControllersWithViews();
 

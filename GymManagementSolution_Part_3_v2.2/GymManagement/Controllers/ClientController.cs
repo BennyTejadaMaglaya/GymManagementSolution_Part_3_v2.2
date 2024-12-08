@@ -22,11 +22,14 @@ namespace GymManagement.Controllers
     [Authorize(Roles = "Admin,Supervisor,Staff")]
     public class ClientController : ElephantController
     {
+        //for sending email
+        private readonly IMyEmailSender _emailSender;
         private readonly GymContext _context;
 
-        public ClientController(GymContext context)
+        public ClientController(GymContext context, IMyEmailSender emailSender)
         {
             _context = context;
+            _emailSender = emailSender;
         }
 
         // GET: Clients
@@ -438,7 +441,7 @@ namespace GymManagement.Controllers
                     workSheet.Column(6).Style.Numberformat.Format = "###,##0.00";
 
                     //Note: You can define a BLOCK of cells: Cells[startRow, startColumn, endRow, endColumn]
-                    //Make Date and Patient Bold
+                    //Make Date and Client Bold
                     workSheet.Cells[4, 1, numRows + 3, 2].Style.Font.Bold = true;
 
                     //Note: these are fine if you are only 'doing' one thing to the range of cells.
