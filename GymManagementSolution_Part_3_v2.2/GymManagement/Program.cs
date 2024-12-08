@@ -1,7 +1,10 @@
 using GymManagement.Data;
+using GymManagement.ViewModels;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using static GymManagement.Utilities.EmailService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,6 +54,13 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Identity/Account/AccessDenied";
     options.SlidingExpiration = true;
 });
+
+//For email service configuration
+builder.Services.AddSingleton<IEmailConfiguration>(builder.Configuration
+    .GetSection("EmailConfiguration").Get<EmailConfiguration>());
+
+//For the Identity System
+builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 builder.Services.AddControllersWithViews();
 
