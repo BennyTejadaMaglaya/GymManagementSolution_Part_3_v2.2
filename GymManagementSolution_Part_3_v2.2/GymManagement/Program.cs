@@ -102,7 +102,7 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
 
-    GymInitializer.Initialize(serviceProvider: services, DeleteDatabase: false,
+    GymInitializer.Initialize(serviceProvider: services, DeleteDatabase: true,
         UseMigrations: true, SeedSampleData: true);
     ApplicationDbInitializer.Initialize(serviceProvider: services,
         UseMigrations: true, SeedSampleData: true);

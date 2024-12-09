@@ -1,4 +1,6 @@
-﻿using GymManagement.Models;
+﻿/* === Teejay Madlangbayan ======== */
+/* === Student Number : 4518838 === */
+using GymManagement.Models;
 using Microsoft.EntityFrameworkCore;
 using GymManagement.ViewModels;
 
