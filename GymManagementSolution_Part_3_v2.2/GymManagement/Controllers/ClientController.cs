@@ -638,11 +638,12 @@ namespace GymManagement.Controllers
             return View();
         }
 
-        private void PopulateClientLists(List<int> selectedClientIds = null)
+        private List<EmailAddress> PopulateClientLists(List<int> selectedClientIds = null)
         {
-            var allClients = _context.Clients;
+            var allClients = _context.Clients; // Fetch all clients from the database
             var selected = new List<ListOptionVM>();
             var available = new List<ListOptionVM>();
+            var selectedEmails = new List<EmailAddress>();
 
             // If no clients are explicitly selected, initialize as empty.
             selectedClientIds ??= new List<int>();
@@ -651,10 +652,19 @@ namespace GymManagement.Controllers
             {
                 if (selectedClientIds.Contains(client.ID))
                 {
+                    if (!string.IsNullOrEmpty(client.Email)) // Ensure valid email exists
+                    {
+                        selectedEmails.Add(new EmailAddress
+                        {
+                            Name = client.FormalName,
+                            Address = client.Email
+                        });
+                    }
+
                     selected.Add(new ListOptionVM
                     {
                         ID = client.ID,
-                        DisplayText = client.FormalName
+                        DisplayText = $"{client.FormalName} ({client.Email})"
                     });
                 }
                 else
@@ -662,11 +672,12 @@ namespace GymManagement.Controllers
                     available.Add(new ListOptionVM
                     {
                         ID = client.ID,
-                        DisplayText = client.FormalName
+                        DisplayText = $"{client.FormalName} ({client.Email})"
                     });
                 }
             }
 
+            // Prepare ViewData for MultiSelectList
             ViewData["selOpts"] = new MultiSelectList(
                 selected.OrderBy(s => s.DisplayText),
                 "ID",
@@ -678,6 +689,9 @@ namespace GymManagement.Controllers
                 "ID",
                 "DisplayText"
             );
+
+            // Return selected emails as a List<EmailAddress>
+            return selectedEmails;
         }
 
         private bool ClientExists(int id)
