@@ -60,9 +60,35 @@
                         @Html.DisplayFor(modelItem => item.MembershipStatus)
                     </td>
                     <td>
-                        <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
-                        <a asp-controller="ClientWorkout" asp-action="Index" asp-route-ClientID="@item.ID">Details</a>  |
-                        <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
+                        @{
+                            var canAccess = User.IsInRole("Admin") || User.IsInRole("Supervisor") || User.IsInRole("Staff") || (User.IsInRole("Client") && User.Identity?.Name == item.Email);
+                        }
+                        @if (canAccess)
+                        {
+                            <a asp-action="Edit" asp-route-id="@item.ID">Edit</a>
+                        }
+                        else
+                        {
+                            <span class="disabled">Edit</span>
+                        }
+                        |
+                        @if (canAccess)
+                        {
+                            <a asp-controller="ClientWorkout" asp-action="Index" asp-route-ClientID="@item.ID">Details</a>
+                        }
+                        else
+                        {
+                            <span class="disabled">Details</span>
+                        }
+                        |
+                        @if (canAccess)
+                        {
+                            <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
+                        }
+                        else
+                        {
+                            <span class="disabled">Delete</span>
+                        }
                     </td>
                 </tr>
             }
@@ -73,6 +99,13 @@
 <div class="card-footer">
     <a asp-controller="Client" asp-action="Notification" class="linkClick">Send Email Notification</a>
 </div>
+<style>
+    .disabled {
+        pointer-events: none;
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+</style>
 @section Scripts {
     <script type="text/javascript">
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))

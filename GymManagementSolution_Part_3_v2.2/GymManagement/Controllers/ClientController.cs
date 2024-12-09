@@ -19,7 +19,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace GymManagement.Controllers
 {
-    [Authorize(Roles = "Admin,Supervisor,Staff")]
+    [Authorize(Roles = "Admin,Supervisor,Staff,Client")]
     public class ClientController : ElephantController
     {
         //for sending email
@@ -35,10 +35,21 @@ namespace GymManagement.Controllers
         // GET: Clients
         public async Task<IActionResult> Index(int? page, int? pageSizeID)
         {
-            var clients = _context.Clients
+            IQueryable<Client> clients = _context.Clients
                 .Include(c => c.MembershipType)
                 .Include(p => p.ClientThumbnail)
                 .AsNoTracking();
+
+            if (User.IsInRole("Client"))
+            {
+                var userEmail = User.Identity?.Name;
+                if (userEmail == null)
+                {
+                    return Unauthorized();
+                }
+
+                clients = clients.Where(c => c.Email == userEmail);
+            }
 
             int pageSize = PageSizeHelper.SetPageSize(HttpContext, pageSizeID, ControllerName());
             ViewData["pageSizeID"] = PageSizeHelper.PageSizeList(pageSize);
@@ -48,7 +59,7 @@ namespace GymManagement.Controllers
         }
 
         // GET: Clients/Details/5
-        [Authorize(Roles = "Admin,Supervisor,Staff")]
+        [Authorize(Roles = "Admin,Supervisor,Staff,Client")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -122,7 +133,7 @@ namespace GymManagement.Controllers
         }
 
         // GET: Clients/Edit/5
-        [Authorize(Roles = "Admin,Supervisor,Staff")]
+        [Authorize(Roles = "Admin,Supervisor,Staff,Client")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -147,7 +158,7 @@ namespace GymManagement.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin,Supervisor,Staff")]
+        [Authorize(Roles = "Admin,Supervisor,Staff,Client")]
         public async Task<IActionResult> Edit(int id, Byte[] RowVersion, string? chkRemoveImage, IFormFile? thePicture)
         {
             //Get the Client to update
@@ -578,6 +589,7 @@ namespace GymManagement.Controllers
         }
 
         // GET: Clients/Email
+        [Authorize(Roles = "Admin,Supervisor,Staff")]
         public IActionResult Notification()
         {
             PopulateClientLists(new List<int>());
@@ -586,6 +598,7 @@ namespace GymManagement.Controllers
 
         [HttpPost]
         // POST: Clients/Email
+        [Authorize(Roles = "Admin,Supervisor,Staff")]
         public async Task<IActionResult> Notification(string selectedClientIds, string Subject, string emailContent)
         {
             PopulateClientLists(new List<int>());
