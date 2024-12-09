@@ -577,121 +577,89 @@ namespace GymManagement.Controllers
             }
         }
 
-        // GET/POST: MedicalTrial/Notification/5
+        // GET: Clients/Email
+        public IActionResult Notification()
+        {
+            PopulateClientLists();
+            return View();
+        }
+
+        // POST: Clients/Email
         public async Task<IActionResult> Notification(int? id, string Subject, string emailContent)
         {
             PopulateClientLists();
-            //if (id == null)
-            //{
-            //    return NotFound();
-            //}
+            if (id == null)
+            {
+                return NotFound();
+            }
             //MedicalTrial? t = await _context.MedicalTrials.FindAsync(id);
 
             //ViewData["id"] = id;
             //ViewData["TrialName"] = t?.TrialName;
 
-            //if (string.IsNullOrEmpty(Subject) || string.IsNullOrEmpty(emailContent))
-            //{
-            //    ViewData["Message"] = "You must enter both a Subject and some message Content before" +
-            //        " sending the message.";
-            //}
-            //else
-            //{
-            //    int folksCount = 0;
-            //    try
-            //    {
-            //        //Send a Notice.
-            //        List<EmailAddress> folks = (from p in _context.Patients
-            //                                    where p.MedicalTrialID == id
-            //                                    where p.EMail != null
-            //                                    select new EmailAddress
-            //                                    {
-            //                                        Name = p.Summary,
-            //                                        Address = p.EMail
-            //                                    }).ToList();
-            //        folksCount = folks.Count;
-            //        if (folksCount > 0)
-            //        {
-            //            var msg = new EmailMessage()
-            //            {
-            //                ToAddresses = folks,
-            //                Subject = Subject,
-            //                Content = "<p>" + emailContent + "</p><p>Please access the <strong>Niagara College</strong> web site to review.</p>"
+            if (string.IsNullOrEmpty(Subject) || string.IsNullOrEmpty(emailContent))
+            {
+                ViewData["Message"] = "You must enter both a Subject and some message Content before" +
+                    " sending the message.";
+            }
+            else
+            {
+                int folksCount = 0;
+                try
+                {
+                    //Send a Notice.
+                    List<EmailAddress> folks = (from c in _context.Clients
+                                                where selectedOptions.Contains(c.ID.ToString())
+                                                where c.Email != null
+                                                select new EmailAddress
+                                                {
+                                                    Name = c.Summary,
+                                                    Address = c.Email
+                                                }).ToList();
+                    folksCount = folks.Count;
+                    if (folksCount > 0)
+                    {
+                        var msg = new EmailMessage()
+                        {
+                            ToAddresses = folks,
+                            Subject = Subject,
+                            Content = "<p>" + emailContent + "</p><p>Please access the <strong>Niagara College</strong> web site to review.</p>"
 
-            //            };
-            //            await _emailSender.SendToManyAsync(msg);
-            //            ViewData["Message"] = "Message sent to " + folksCount + " Patient"
-            //                + ((folksCount == 1) ? "." : "s.");
-            //        }
-            //        else
-            //        {
-            //            ViewData["Message"] = "Message NOT sent!  No Patients in medical trial.";
-            //        }
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        string errMsg = ex.GetBaseException().Message;
-            //        ViewData["Message"] = "Error: Could not send email message to the " + folksCount + " Patient"
-            //            + ((folksCount == 1) ? "" : "s") + " in the trial.";
-            //    }
-            //}
+                        };
+                        await _emailSender.SendToManyAsync(msg);
+                        ViewData["Message"] = "Message sent to " + folksCount + " Patient"
+                            + ((folksCount == 1) ? "." : "s.");
+                    }
+                    else
+                    {
+                        ViewData["Message"] = "Message NOT sent!  No Patients in medical trial.";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    string errMsg = ex.GetBaseException().Message;
+                    ViewData["Message"] = "Error: Could not send email message to the " + folksCount + " Patient"
+                        + ((folksCount == 1) ? "" : "s") + " in the trial.";
+                }
+            }
             return View();
         }
 
-        private List<EmailAddress> PopulateClientLists(List<int> selectedClientIds = null)
+        private void PopulateClientLists()
         {
-            var allClients = _context.Clients; // Fetch all clients from the database
+            var allClients = _context.Clients;
             var selected = new List<ListOptionVM>();
             var available = new List<ListOptionVM>();
-            var selectedEmails = new List<EmailAddress>();
-
-            // If no clients are explicitly selected, initialize as empty.
-            selectedClientIds ??= new List<int>();
-
-            foreach (var client in allClients)
+            foreach (var c in allClients)
             {
-                if (selectedClientIds.Contains(client.ID))
+                available.Add(new ListOptionVM
                 {
-                    if (!string.IsNullOrEmpty(client.Email)) // Ensure valid email exists
-                    {
-                        selectedEmails.Add(new EmailAddress
-                        {
-                            Name = client.FormalName,
-                            Address = client.Email
-                        });
-                    }
-
-                    selected.Add(new ListOptionVM
-                    {
-                        ID = client.ID,
-                        DisplayText = $"{client.FormalName} ({client.Email})"
-                    });
-                }
-                else
-                {
-                    available.Add(new ListOptionVM
-                    {
-                        ID = client.ID,
-                        DisplayText = $"{client.FormalName} ({client.Email})"
-                    });
-                }
+                    ID = c.ID,
+                    DisplayText = c.FormalName
+                });
             }
-
-            // Prepare ViewData for MultiSelectList
-            ViewData["selOpts"] = new MultiSelectList(
-                selected.OrderBy(s => s.DisplayText),
-                "ID",
-                "DisplayText"
-            );
-
-            ViewData["availOpts"] = new MultiSelectList(
-                available.OrderBy(s => s.DisplayText),
-                "ID",
-                "DisplayText"
-            );
-
-            // Return selected emails as a List<EmailAddress>
-            return selectedEmails;
+            ViewData["selOpts"] = new MultiSelectList(selected.OrderBy(s => s.DisplayText), "ID", "DisplayText");
+            ViewData["availOpts"] = new MultiSelectList(available.OrderBy(s => s.DisplayText), "ID", "DisplayText");
         }
 
         private bool ClientExists(int id)
