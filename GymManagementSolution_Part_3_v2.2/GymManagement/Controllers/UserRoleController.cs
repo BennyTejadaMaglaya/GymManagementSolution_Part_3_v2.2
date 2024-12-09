@@ -1,4 +1,5 @@
-﻿using GymManagement.CustomControllers;
+﻿using System.Security.Claims;
+using GymManagement.CustomControllers;
 using GymManagement.Data;
 using GymManagement.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -46,6 +47,12 @@ namespace GymManagement.Controllers
             {
                 return new BadRequestResult();
             }
+
+            if (User?.FindFirstValue(ClaimTypes.NameIdentifier) == id)
+            {
+                return Unauthorized("You cannot edit your own roles.");
+            }
+
             var _user = await _userManager.FindByIdAsync(id);//IdentityRole
             if (_user == null)
             {
@@ -66,6 +73,11 @@ namespace GymManagement.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string Id, string[] selectedRoles)
         {
+            if (User?.FindFirstValue(ClaimTypes.NameIdentifier) == Id)
+            {
+                return Unauthorized("You cannot edit your own roles.");
+            }
+
             var _user = await _userManager.FindByIdAsync(Id);//IdentityRole
             UserVM user = new UserVM
             {
